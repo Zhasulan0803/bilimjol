@@ -1,18 +1,27 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-export async function POST(req: Request) {
-  const supabase = createClient(
+// Public client for auth.signUp (uses anon key)
+const anonClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+// Admin client for profile update (bypasses RLS)
+const adminClient = () =>
+  createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
-  const { fullName, email, password, phone, role } = await req.json();
+
+export async function POST(req: Request) {
+  const { fullName, email, password, phone } = await req.json();
 
   if (!fullName || !email || !password) {
     return NextResponse.json({ error: "Барлық өрістерді толтырыңыз" }, { status: 400 });
   }
 
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await anonClient.auth.signUp({ email, password });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
@@ -23,15 +32,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Тіркелу сәтсіз аяқталды" }, { status: 500 });
   }
 
-  const { error: profileError } = await supabase.from("profiles").insert({
-    id: userId,
-    full_name: fullName,
-    phone: phone ?? null,
-    role: role ?? "student",
-  });
+  // Use service role to update profile (trigger may not have run yet,
+  // so use upsert to cover both cases)
+  const { error: profileError } = await adminClient()
+    .from("profiles")
+    .upsert({ id: userId, full_name: fullName, phone: phone ?? null, role: "student" });
 
   if (profileError) {
-    return NextResponse.json({ error: profileError.message }, { status: 500 });
+    console.error("Profile upsert error:", profileError.message);
+    return NextResponse.json({ error: "Профиль сақталмады: " + profileError.message }, { status: 500 });
   }
 
   return NextResponse.json({ success: true, userId });
