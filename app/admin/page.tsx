@@ -5,10 +5,9 @@ import { supabase } from "@/lib/supabase";
 
 type Profile = {
   id: string;
-  name: string;
-  email: string;
+  full_name: string;
+  phone: string | null;
   role: string;
-  grade: number | null;
   created_at: string;
 };
 
@@ -92,8 +91,8 @@ export default function AdminPage() {
 
   const filtered = profiles.filter(
     (p) =>
-      p.name?.toLowerCase().includes(search.toLowerCase()) ||
-      p.email?.toLowerCase().includes(search.toLowerCase())
+      p.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+      p.phone?.toLowerCase().includes(search.toLowerCase())
   );
 
   const stats = {
@@ -140,7 +139,7 @@ export default function AdminPage() {
 
         {/* Search */}
         <input
-          placeholder="Іздеу: аты немесе email…"
+          placeholder="Іздеу: аты немесе телефон…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{ width: "100%", padding: "12px 16px", borderRadius: 10, border: "1px solid #E5E7EB", fontSize: 14, marginBottom: 16, fontFamily: "inherit", boxSizing: "border-box" }}
@@ -153,8 +152,7 @@ export default function AdminPage() {
               <thead>
                 <tr style={{ background: "#F9FAFB", textAlign: "left", color: "#6B7280" }}>
                   <th style={{ padding: "12px 16px", fontWeight: 600 }}>Аты</th>
-                  <th style={{ padding: "12px 16px", fontWeight: 600 }}>Email</th>
-                  <th style={{ padding: "12px 16px", fontWeight: 600 }}>Сынып</th>
+                  <th style={{ padding: "12px 16px", fontWeight: 600 }}>Телефон</th>
                   <th style={{ padding: "12px 16px", fontWeight: 600 }}>Рөл</th>
                   <th style={{ padding: "12px 16px", fontWeight: 600 }}></th>
                 </tr>
@@ -162,9 +160,8 @@ export default function AdminPage() {
               <tbody>
                 {filtered.map((p) => (
                   <tr key={p.id} style={{ borderTop: "1px solid #F3F4F6" }}>
-                    <td style={{ padding: "12px 16px", fontWeight: 600, color: "#111827" }}>{p.name}</td>
-                    <td style={{ padding: "12px 16px", color: "#6B7280" }}>{p.email}</td>
-                    <td style={{ padding: "12px 16px", color: "#6B7280" }}>{p.grade ?? "—"}</td>
+                    <td style={{ padding: "12px 16px", fontWeight: 600, color: "#111827" }}>{p.full_name}</td>
+                    <td style={{ padding: "12px 16px", color: "#6B7280" }}>{p.phone ?? "—"}</td>
                     <td style={{ padding: "12px 16px" }}>
                       <select
                         value={p.role}
@@ -178,7 +175,7 @@ export default function AdminPage() {
                     </td>
                     <td style={{ padding: "12px 16px", textAlign: "right" }}>
                       <button
-                        onClick={() => removeUser(p.id, p.name)}
+                        onClick={() => removeUser(p.id, p.full_name)}
                         style={{ background: "none", border: "none", color: "#EF4444", cursor: "pointer", fontSize: 13, fontWeight: 600 }}
                       >
                         Жою
@@ -188,7 +185,7 @@ export default function AdminPage() {
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={5} style={{ padding: "24px 16px", textAlign: "center", color: "#9CA3AF" }}>
+                    <td colSpan={4} style={{ padding: "24px 16px", textAlign: "center", color: "#9CA3AF" }}>
                       Пайдаланушылар табылмады
                     </td>
                   </tr>

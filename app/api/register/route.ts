@@ -6,9 +6,9 @@ export async function POST(req: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
-  const { name, email, password, grade, role } = await req.json();
+  const { fullName, email, password, phone, role } = await req.json();
 
-  if (!name || !email || !password) {
+  if (!fullName || !email || !password) {
     return NextResponse.json({ error: "Барлық өрістерді толтырыңыз" }, { status: 400 });
   }
 
@@ -25,9 +25,8 @@ export async function POST(req: Request) {
 
   const { error: profileError } = await supabase.from("profiles").insert({
     id: userId,
-    name,
-    email,
-    grade: grade ? parseInt(grade) : null,
+    full_name: fullName,
+    phone: phone ?? null,
     role: role ?? "student",
   });
 
