@@ -1,157 +1,140 @@
-'use client';
-import { useState } from 'react';
-import { COURSES, QUESTIONS } from '../../data/courses';
-import { useAuthStore } from '../../store/auth';
-import { CheckCircle, XCircle, Clock, Trophy, ArrowRight, RotateCcw } from 'lucide-react';
+"use client";
+import { useState } from "react";
 
-type Phase = 'select'|'test'|'result';
+const TESTS = [
+  { id: 1, subject: "Математика", name: "Алгебра негіздері", questions: 20, time: 30, difficulty: "Базалық", color: "#EDE9FE", done: true, score: 85 },
+  { id: 2, subject: "Математика", name: "Геометрия", questions: 15, time: 25, difficulty: "Орта", color: "#DBEAFE", done: true, score: 72 },
+  { id: 3, subject: "Физика", name: "Механика", questions: 20, time: 30, difficulty: "Орта", color: "#D1FAE5", done: false, score: 0 },
+  { id: 4, subject: "Математика", name: "Квадрат теңдеулер", questions: 25, time: 40, difficulty: "Маңызды", color: "#FCE7F3", done: false, score: 0 },
+  { id: 5, subject: "Химия", name: "Химиялық реакциялар", questions: 15, time: 20, difficulty: "Базалық", color: "#FEF3C7", done: true, score: 90 },
+  { id: 6, subject: "Биология", name: "Жасушалар", questions: 20, time: 30, difficulty: "Базалық", color: "#DBEAFE", done: false, score: 0 },
+];
 
-export default function Tests() {
-  const { addPoints } = useAuthStore();
-  const [phase, setPhase] = useState<Phase>('select');
-  const [selectedCourse, setSelectedCourse] = useState<string|null>(null);
-  const [current, setCurrent] = useState(0);
+export default function TestsPage() {
+  const [activeTest, setActiveTest] = useState<number | null>(null);
+  const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
-  const [selected, setSelected] = useState<number|null>(null);
-  const [showExpl, setShowExpl] = useState(false);
-  const [startTime] = useState(Date.now());
+  const [finished, setFinished] = useState(false);
 
-  const coursesWithTests = COURSES.filter(c => QUESTIONS[c.id]);
-  const questions = selectedCourse ? QUESTIONS[selectedCourse] || [] : [];
-  const q = questions[current];
-  const score = answers.filter((a, i) => a === questions[i]?.correct).length;
+  const SAMPLE_QUESTIONS = [
+    { q: "2x + 5 = 13 теңдеуін шеш", options: ["x = 3", "x = 4", "x = 5", "x = 6"], correct: 1 },
+    { q: "Үшбұрыштың бұрыштарының қосындысы:", options: ["90°", "180°", "270°", "360°"], correct: 1 },
+    { q: "√144 = ?", options: ["11", "12", "13", "14"], correct: 1 },
+    { q: "3² + 4² = ?", options: ["20", "25", "30", "35"], correct: 1 },
+    { q: "Квадраттың периметрі a = 5 болса:", options: ["15", "20", "25", "30"], correct: 1 },
+  ];
 
   const handleAnswer = (idx: number) => {
-    if (selected !== null) return;
-    setSelected(idx);
-    setShowExpl(true);
-  };
-
-  const next = () => {
-    if (selected === null) return;
-    setAnswers(prev => [...prev, selected]);
-    if (current + 1 < questions.length) {
-      setCurrent(c => c + 1);
-      setSelected(null);
-      setShowExpl(false);
+    const newAnswers = [...answers, idx];
+    setAnswers(newAnswers);
+    if (currentQ + 1 >= SAMPLE_QUESTIONS.length) {
+      setFinished(true);
     } else {
-      const pts = answers.filter((a,i)=>a===questions[i]?.correct).length * 10 + (selected===q?.correct?10:0);
-      addPoints(pts);
-      setPhase('result');
+      setCurrentQ(currentQ + 1);
     }
   };
 
-  const restart = () => {
-    setPhase('select'); setSelectedCourse(null); setCurrent(0);
-    setAnswers([]); setSelected(null); setShowExpl(false);
-  };
+  const correctCount = answers.filter((a, i) => a === SAMPLE_QUESTIONS[i]?.correct).length;
+  const score = Math.round((correctCount / SAMPLE_QUESTIONS.length) * 100);
 
-  if (phase==='select') return (
-    <div style={{ padding:'32px' }}>
-      <h1 style={{ fontSize:24, fontWeight:900, marginBottom:4 }}>Тесттер 🎯</h1>
-      <p style={{ color:'#6B7280', marginBottom:28 }}>Білімді тексер, ұпай жина!</p>
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16 }}>
-        {coursesWithTests.map(c => (
-          <button key={c.id} onClick={() => { setSelectedCourse(c.id); setPhase('test'); }}
-            style={{ background:'#fff', border:`2px solid ${c.color}33`, borderRadius:16, padding:'20px', textAlign:'left', cursor:'pointer', transition:'all 0.2s', fontFamily:'inherit' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor=c.color; e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow=`0 8px 24px ${c.color}22`; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor=c.color+'33'; e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow=''; }}>
-            <div style={{ fontSize:36, marginBottom:10 }}>{c.emoji}</div>
-            <div style={{ fontWeight:800, fontSize:16, color:'#111827', marginBottom:4 }}>{c.title}</div>
-            <div style={{ fontSize:13, color:'#6B7280', marginBottom:12 }}>{c.grade}-сынып · {QUESTIONS[c.id].length} сұрақ</div>
-            <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-              <div style={{ background:c.color, color:'#fff', fontSize:12, fontWeight:700, padding:'4px 12px', borderRadius:8 }}>Бастау →</div>
-              <div style={{ fontSize:12, color:'#6B7280' }}>~{QUESTIONS[c.id].length * 2} мин</div>
+  if (activeTest !== null) {
+    if (finished) {
+      return (
+        <div style={{ padding: 24, fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "80vh" }}>
+          <div style={{ background: "#fff", borderRadius: 24, padding: 40, textAlign: "center", maxWidth: 400, width: "100%", border: "1px solid #E5E7EB" }}>
+            <div style={{ fontSize: 64, marginBottom: 16 }}>{score >= 80 ? "🎉" : score >= 60 ? "👍" : "📚"}</div>
+            <h2 style={{ fontSize: 24, fontWeight: 800, color: "#1F2937", marginBottom: 8 }}>Тест аяқталды!</h2>
+            <div style={{ fontSize: 48, fontWeight: 900, color: score >= 80 ? "#10B981" : score >= 60 ? "#F59E0B" : "#EF4444", marginBottom: 8 }}>{score}%</div>
+            <p style={{ color: "#6B7280", marginBottom: 24 }}>{correctCount}/{SAMPLE_QUESTIONS.length} дұрыс жауап</p>
+            <button
+              onClick={() => { setActiveTest(null); setCurrentQ(0); setAnswers([]); setFinished(false); }}
+              style={{ width: "100%", padding: "14px", borderRadius: 12, background: "linear-gradient(135deg,#7C3AED,#EC4899)", color: "#fff", fontWeight: 700, fontSize: 15, border: "none", cursor: "pointer", fontFamily: "inherit" }}
+            >
+              Тесттерге қайту
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    const q = SAMPLE_QUESTIONS[currentQ];
+    return (
+      <div style={{ padding: 24, fontFamily: "Inter, sans-serif" }}>
+        <div style={{ maxWidth: 600, margin: "0 auto" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+            <button onClick={() => { setActiveTest(null); setCurrentQ(0); setAnswers([]); }} style={{ background: "none", border: "none", color: "#7C3AED", fontWeight: 600, cursor: "pointer", fontSize: 14, fontFamily: "inherit" }}>
+              ← Шығу
+            </button>
+            <span style={{ color: "#6B7280", fontSize: 14 }}>{currentQ + 1}/{SAMPLE_QUESTIONS.length}</span>
+          </div>
+
+          <div style={{ height: 6, background: "#E5E7EB", borderRadius: 3, marginBottom: 32 }}>
+            <div style={{ height: "100%", width: `${((currentQ + 1) / SAMPLE_QUESTIONS.length) * 100}%`, background: "linear-gradient(90deg,#7C3AED,#EC4899)", borderRadius: 3, transition: "width 0.3s" }} />
+          </div>
+
+          <div style={{ background: "#fff", borderRadius: 20, padding: 28, border: "1px solid #E5E7EB", marginBottom: 20 }}>
+            <div style={{ fontSize: 13, color: "#7C3AED", fontWeight: 700, marginBottom: 12 }}>Сұрақ {currentQ + 1}</div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1F2937", lineHeight: 1.4 }}>{q.q}</h3>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {q.options.map((opt, i) => (
+              <button
+                key={i}
+                onClick={() => handleAnswer(i)}
+                style={{ padding: "16px 20px", borderRadius: 12, border: "2px solid #E5E7EB", background: "#fff", textAlign: "left", fontSize: 15, color: "#1F2937", cursor: "pointer", fontFamily: "inherit", fontWeight: 500, transition: "all 0.15s" }}
+              >
+                <span style={{ color: "#7C3AED", fontWeight: 700, marginRight: 10 }}>{["A", "B", "C", "D"][i]}.</span>
+                {opt}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: 24, fontFamily: "Inter, sans-serif" }}>
+      <style>{`
+        .tests-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        @media (max-width: 900px) { .tests-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+        @media (max-width: 480px) { .tests-grid { grid-template-columns: 1fr !important; } }
+      `}</style>
+
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1F2937" }}>Тесттер 📝</h1>
+        <p style={{ color: "#6B7280", fontSize: 14, marginTop: 4 }}>Білімді тексер</p>
+      </div>
+
+      <div className="tests-grid">
+        {TESTS.map(t => (
+          <div key={t.id} style={{ background: "#fff", borderRadius: 16, overflow: "hidden", border: "1px solid #E5E7EB" }}>
+            <div style={{ height: 80, background: t.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>
+              {t.done ? "✅" : "📝"}
             </div>
-          </button>
+            <div style={{ padding: 16 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#7C3AED", marginBottom: 4 }}>{t.subject}</div>
+              <div style={{ fontWeight: 700, color: "#1F2937", marginBottom: 8, fontSize: 14 }}>{t.name}</div>
+              <div style={{ display: "flex", gap: 12, fontSize: 12, color: "#6B7280", marginBottom: 12 }}>
+                <span>❓ {t.questions} сұрақ</span>
+                <span>⏱ {t.time} мин</span>
+              </div>
+              {t.done && (
+                <div style={{ fontSize: 13, fontWeight: 700, color: t.score >= 80 ? "#10B981" : "#F59E0B", marginBottom: 8 }}>
+                  Нәтиже: {t.score}%
+                </div>
+              )}
+              <button
+                onClick={() => { setActiveTest(t.id); setCurrentQ(0); setAnswers([]); setFinished(false); }}
+                style={{ width: "100%", padding: "10px", borderRadius: 10, border: "none", background: t.done ? "#F3F4F6" : "linear-gradient(135deg,#7C3AED,#EC4899)", color: t.done ? "#374151" : "#fff", fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}
+              >
+                {t.done ? "Қайта тапсыру" : "Бастау →"}
+              </button>
+            </div>
+          </div>
         ))}
       </div>
     </div>
   );
-
-  if (phase==='test' && q) {
-    const course = COURSES.find(c=>c.id===selectedCourse);
-    const progress = Math.round((current/questions.length)*100);
-    return (
-      <div style={{ padding:'32px', maxWidth:700, margin:'0 auto' }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
-          <div style={{ fontSize:14, fontWeight:700, color:'#7C3AED' }}>{course?.emoji} {course?.title}</div>
-          <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:14, color:'#6B7280' }}>
-            <Clock size={14}/> Сұрақ {current+1}/{questions.length}
-          </div>
-        </div>
-        <div style={{ height:8, background:'#F3F4F6', borderRadius:4, marginBottom:28, overflow:'hidden' }}>
-          <div style={{ height:'100%', width:`${progress}%`, background:`linear-gradient(90deg,${course?.color},${course?.color}88)`, borderRadius:4, transition:'width 0.4s' }}/>
-        </div>
-        <div style={{ background:'#fff', border:'1.5px solid #F3F4F6', borderRadius:20, padding:'28px', marginBottom:16, boxShadow:'0 4px 16px rgba(0,0,0,0.06)' }}>
-          <div style={{ fontSize:11, fontWeight:700, color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.5px', marginBottom:12 }}>Сұрақ {current+1}</div>
-          <h2 style={{ fontSize:18, fontWeight:800, color:'#111827', lineHeight:1.4, marginBottom:24 }}>{q.text}</h2>
-          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-            {q.options.map((opt: string, i: number) => {
-              let bg = '#F9FAFB', border = '1.5px solid #E5E7EB', color = '#374151';
-              if (selected !== null) {
-                if (i === q.correct) { bg='#ECFDF5'; border='2px solid #10B981'; color='#065F46'; }
-                else if (i === selected && selected !== q.correct) { bg='#FEF2F2'; border='2px solid #EF4444'; color='#991B1B'; }
-              }
-              return (
-                <button key={i} onClick={() => handleAnswer(i)}
-                  style={{ background:bg, border, borderRadius:12, padding:'14px 16px', textAlign:'left', cursor:selected!==null?'default':'pointer', color, fontSize:15, fontWeight:500, display:'flex', alignItems:'center', gap:10, transition:'all 0.2s', fontFamily:'inherit' }}>
-                  <div style={{ width:28, height:28, borderRadius:'50%', background:selected!==null&&i===q.correct?'#10B981':selected===i&&selected!==q.correct?'#EF4444':'#E5E7EB', color:selected!==null?(i===q.correct||selected===i)?'#fff':'#6B7280':'#6B7280', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700, flexShrink:0 }}>
-                    {selected!==null&&i===q.correct?<CheckCircle size={16}/>:selected===i&&selected!==q.correct?<XCircle size={16}/>:['A','B','C','D'][i]}
-                  </div>
-                  {opt}
-                </button>
-              );
-            })}
-          </div>
-          {showExpl && (
-            <div style={{ marginTop:16, padding:'14px 16px', background:'#F5F3FF', border:'1.5px solid #DDD6FE', borderRadius:12 }}>
-              <div style={{ fontSize:13, fontWeight:700, color:'#7C3AED', marginBottom:4 }}>💡 Түсіндірме</div>
-              <div style={{ fontSize:14, color:'#374151' }}>{q.explanation}</div>
-            </div>
-          )}
-        </div>
-        {selected !== null && (
-          <button onClick={next} style={{ width:'100%', padding:'14px', background:'linear-gradient(135deg,#7C3AED,#EC4899)', border:'none', borderRadius:12, color:'#fff', fontWeight:800, fontSize:16, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:8, fontFamily:'inherit' }}>
-            {current+1<questions.length?'Келесі сұрақ':'Нәтижені көру'} <ArrowRight size={18}/>
-          </button>
-        )}
-      </div>
-    );
-  }
-
-  if (phase==='result') {
-    const finalScore = answers.filter((a,i)=>a===questions[i]?.correct).length;
-    const pct = Math.round(finalScore/questions.length*100);
-    const course = COURSES.find(c=>c.id===selectedCourse);
-    return (
-      <div style={{ padding:'32px', maxWidth:600, margin:'0 auto', textAlign:'center' }}>
-        <div style={{ background:'linear-gradient(135deg,#7C3AED,#EC4899)', borderRadius:24, padding:'40px', marginBottom:24, color:'#fff' }}>
-          <div style={{ fontSize:64, marginBottom:16 }}>{pct>=80?'🏆':pct>=60?'⭐':'💪'}</div>
-          <div style={{ fontSize:32, fontWeight:900, marginBottom:8 }}>{pct}%</div>
-          <div style={{ fontSize:18, fontWeight:700, marginBottom:4 }}>{pct>=80?'Керемет нәтиже!':pct>=60?'Жақсы!':'Тағы жаттық!'}</div>
-          <div style={{ fontSize:14, color:'#E9D5FF' }}>{finalScore}/{questions.length} дұрыс жауап · +{finalScore*10} XP</div>
-        </div>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:24 }}>
-          <div style={{ background:'#fff', border:'1.5px solid #F3F4F6', borderRadius:16, padding:'16px' }}>
-            <div style={{ fontSize:24, fontWeight:900, color:'#111827' }}>{finalScore}/{questions.length}</div>
-            <div style={{ fontSize:13, color:'#6B7280' }}>Дұрыс жауап</div>
-          </div>
-          <div style={{ background:'#fff', border:'1.5px solid #F3F4F6', borderRadius:16, padding:'16px' }}>
-            <div style={{ fontSize:24, fontWeight:900, color:'#7C3AED' }}>+{finalScore*10}</div>
-            <div style={{ fontSize:13, color:'#6B7280' }}>Ұпай жинадыңыз</div>
-          </div>
-        </div>
-        <div style={{ display:'flex', gap:12 }}>
-          <button onClick={restart} style={{ flex:1, padding:'14px', background:'#F5F3FF', border:'2px solid #7C3AED', borderRadius:12, color:'#7C3AED', fontWeight:700, fontSize:15, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:8, fontFamily:'inherit' }}>
-            <RotateCcw size={16}/> Қайтадан
-          </button>
-          <button onClick={restart} style={{ flex:1, padding:'14px', background:'linear-gradient(135deg,#7C3AED,#EC4899)', border:'none', borderRadius:12, color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer', fontFamily:'inherit' }}>
-            Басқа тест →
-          </button>
-        </div>
-      </div>
-    );
-  }
-  return null;
-}
+} 

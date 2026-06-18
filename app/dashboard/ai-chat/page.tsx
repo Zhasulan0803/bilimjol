@@ -1,123 +1,141 @@
-'use client';
-import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, RefreshCw } from 'lucide-react';
+"use client";
+import { useState, useRef, useEffect } from "react";
 
-interface Msg { role:'user'|'assistant'; content:string; }
+interface Message {
+  role: "user" | "assistant";
+  text: string;
+}
 
 const SUGGESTIONS = [
-  'x² - 5x + 6 = 0 теңдеуін шеш',
-  'Пифагор теоремасын түсіндір',
-  'Кинематика дегеніміз не?',
-  'Химиялық байланыс түрлері',
-  'ҰБТ-ға қалай дайындалу керек?',
+  "Квадрат теңдеуді қалай шешемін?",
+  "Пифагор теоремасын түсіндір",
+  "sin 30° неге тең?",
+  "Периметр мен ауданның айырмасы",
+  "Олимпиада есебін шығаруға көмектес",
 ];
 
-export default function AIChat() {
-  const [messages, setMessages] = useState<Msg[]>([
-    { role:'assistant', content:'Сәлем! Мен БілімЖол ЖИ кеңесшісімін 🤖\n\nМатематика, физика, химия, биология немесе кез келген пән бойынша сұрақ қой — қазақ тілінде жауап берем!\n\nНе білгің келеді?' }
+export default function AiChatPage() {
+  const [messages, setMessages] = useState<Message[]>([
+    { role: "assistant", text: "Сәлем! Мен БілімЖол ЖИ кеңесшісімін 🤖\n\nМатематика, физика, химия және басқа пәндер бойынша сұрақтарыңа жауап беремін. Қалай көмектесе аламын?" }
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:'smooth' }); }, [messages]);
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  const send = async (text?: string) => {
-    const q = text || input.trim();
-    if (!q || loading) return;
-    setInput('');
-    setMessages(prev => [...prev, { role:'user', content:q }]);
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || loading) return;
+
+    const userMsg: Message = { role: "user", text };
+    setMessages(prev => [...prev, userMsg]);
+    setInput("");
     setLoading(true);
+
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          model:'claude-sonnet-4-6',
-          max_tokens:1000,
-          system:'Сен БілімЖол платформасының оқу көмекшісісің. Қазақстан мектеп оқушыларына (5-10 сынып) математика, физика, химия, биология, қазақ тілі, тарих пәндері бойынша көмектесесің. Барлық жауаптарды қазақ тілінде бер. Жауаптарды қысқа, түсінікті және мысалдармен бер. Формулаларды көрсет. Ынталандыр және мақта.',
-          messages:[...messages, { role:'user', content:q }].map(m=>({ role:m.role, content:m.content }))
-        })
+      const res = await fetch("/api/ai-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text }),
       });
       const data = await res.json();
-      const reply = data.content?.[0]?.text || 'Кешіріңіз, жауап ала алмадым.';
-      setMessages(prev => [...prev, { role:'assistant', content:reply }]);
+      setMessages(prev => [...prev, { role: "assistant", text: data.reply }]);
     } catch {
-      setMessages(prev => [...prev, { role:'assistant', content:'Интернет байланысын тексеріңіз немесе кейінірек қайталаңыз.' }]);
+      setMessages(prev => [...prev, { role: "assistant", text: "Кешіріңіз, қате шықты. Қайта көріңіз." }]);
     }
     setLoading(false);
   };
 
   return (
-    <div style={{ height:'100vh', display:'flex', flexDirection:'column', background:'#F8F7FF' }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", fontFamily: "Inter, sans-serif" }}>
       {/* Header */}
-      <div style={{ background:'linear-gradient(135deg,#7C3AED,#EC4899)', padding:'16px 24px', display:'flex', alignItems:'center', gap:12 }}>
-        <div style={{ width:40, height:40, borderRadius:12, background:'rgba(255,255,255,0.2)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <Bot size={22} color="#fff"/>
-        </div>
+      <div style={{ padding: "16px 24px", borderBottom: "1px solid #E5E7EB", background: "#fff", display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg,#7C3AED,#EC4899)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>🤖</div>
         <div>
-          <div style={{ fontWeight:800, fontSize:16, color:'#fff' }}>ЖИ Кеңесші</div>
-          <div style={{ fontSize:12, color:'#E9D5FF' }}>Кез келген пән бойынша сұрақ қой</div>
+          <div style={{ fontWeight: 800, fontSize: 15, color: "#1F2937" }}>ЖИ кеңесші</div>
+          <div style={{ fontSize: 12, color: "#10B981", fontWeight: 600 }}>● Онлайн</div>
         </div>
-        <button onClick={() => setMessages([{ role:'assistant', content:'Жаңа сұхбат бастадық! Не білгің келеді?' }])}
-          style={{ marginLeft:'auto', background:'rgba(255,255,255,0.15)', border:'none', borderRadius:8, padding:'6px 12px', color:'#fff', cursor:'pointer', display:'flex', alignItems:'center', gap:6, fontSize:13, fontWeight:600 }}>
-          <RefreshCw size={14}/> Тазалау
-        </button>
+        <span style={{ marginLeft: "auto", background: "#10B981", color: "#fff", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 50 }}>NEW</span>
       </div>
 
       {/* Messages */}
-      <div style={{ flex:1, overflowY:'auto', padding:'24px' }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "24px 16px", background: "#F9FAFB", display: "flex", flexDirection: "column", gap: 16 }}>
         {messages.map((m, i) => (
-          <div key={i} style={{ display:'flex', gap:12, marginBottom:20, flexDirection:m.role==='user'?'row-reverse':'row' }}>
-            <div style={{ width:36, height:36, borderRadius:10, background:m.role==='user'?'linear-gradient(135deg,#7C3AED,#EC4899)':'linear-gradient(135deg,#1E1B4B,#312E81)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-              {m.role==='user' ? <User size={18} color="#fff"/> : <Bot size={18} color="#A78BFA"/>}
+          <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", gap: 10 }}>
+            {m.role === "assistant" && (
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg,#7C3AED,#EC4899)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0, marginTop: 2 }}>🤖</div>
+            )}
+            <div style={{
+              maxWidth: "75%", padding: "12px 16px", borderRadius: m.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+              background: m.role === "user" ? "linear-gradient(135deg,#7C3AED,#EC4899)" : "#fff",
+              color: m.role === "user" ? "#fff" : "#1F2937",
+              fontSize: 14, lineHeight: 1.6,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+              whiteSpace: "pre-wrap",
+              border: m.role === "assistant" ? "1px solid #E5E7EB" : "none",
+            }}>
+              {m.text}
             </div>
-            <div style={{ maxWidth:'72%', background:m.role==='user'?'linear-gradient(135deg,#7C3AED,#EC4899)':'#fff', border:m.role==='assistant'?'1.5px solid #F3F4F6':'none', borderRadius:m.role==='user'?'16px 4px 16px 16px':'4px 16px 16px 16px', padding:'12px 16px', color:m.role==='user'?'#fff':'#111827', fontSize:14, lineHeight:1.65, whiteSpace:'pre-wrap', boxShadow:m.role==='assistant'?'0 2px 8px rgba(0,0,0,0.06)':'none' }}>
-              {m.content}
-            </div>
+            {m.role === "user" && (
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg,#7C3AED,#EC4899)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 14, flexShrink: 0, marginTop: 2 }}>А</div>
+            )}
           </div>
         ))}
         {loading && (
-          <div style={{ display:'flex', gap:12, marginBottom:20 }}>
-            <div style={{ width:36, height:36, borderRadius:10, background:'linear-gradient(135deg,#1E1B4B,#312E81)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <Bot size={18} color="#A78BFA"/>
-            </div>
-            <div style={{ background:'#fff', border:'1.5px solid #F3F4F6', borderRadius:'4px 16px 16px 16px', padding:'14px 18px', boxShadow:'0 2px 8px rgba(0,0,0,0.06)' }}>
-              <div style={{ display:'flex', gap:6 }}>
-                {[0,1,2].map(i => <div key={i} style={{ width:8, height:8, borderRadius:'50%', background:'#7C3AED', animation:`bounce 1s ${i*0.15}s infinite` }}/>)}
-              </div>
+          <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+            <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg,#7C3AED,#EC4899)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🤖</div>
+            <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: "18px 18px 18px 4px", padding: "14px 18px", display: "flex", gap: 6, alignItems: "center" }}>
+              {[0,1,2].map(i => (
+                <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: "#7C3AED", animation: `bounce 1.2s ${i * 0.2}s infinite` }} />
+              ))}
             </div>
           </div>
         )}
-        <div ref={bottomRef}/>
+        <div ref={bottomRef} />
       </div>
 
       {/* Suggestions */}
-      {messages.length <= 2 && (
-        <div style={{ padding:'0 24px 12px', display:'flex', gap:8, flexWrap:'wrap' }}>
+      {messages.length <= 1 && (
+        <div style={{ padding: "12px 16px", background: "#F9FAFB", display: "flex", gap: 8, flexWrap: "wrap" }}>
           {SUGGESTIONS.map(s => (
-            <button key={s} onClick={() => send(s)} style={{ background:'#fff', border:'1.5px solid #E9D5FF', borderRadius:20, padding:'6px 14px', fontSize:13, color:'#7C3AED', cursor:'pointer', fontWeight:600, display:'flex', alignItems:'center', gap:6 }}>
-              <Sparkles size={12}/> {s}
+            <button
+              key={s}
+              onClick={() => sendMessage(s)}
+              style={{ padding: "8px 14px", borderRadius: 50, fontSize: 13, border: "1px solid #E5E7EB", background: "#fff", color: "#374151", cursor: "pointer", fontFamily: "inherit", fontWeight: 500 }}
+            >
+              {s}
             </button>
           ))}
         </div>
       )}
 
       {/* Input */}
-      <div style={{ padding:'12px 24px 20px', background:'#fff', borderTop:'1.5px solid #F3F4F6' }}>
-        <div style={{ display:'flex', gap:10, background:'#F9FAFB', border:'2px solid #E5E7EB', borderRadius:16, padding:'8px 8px 8px 16px', transition:'border 0.2s' }}
-          onFocusCapture={e => e.currentTarget.style.borderColor='#7C3AED'}
-          onBlurCapture={e => e.currentTarget.style.borderColor='#E5E7EB'}>
-          <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key==='Enter' && !e.shiftKey && send()}
-            placeholder="Сұрағыңды жаз... (математика, физика, химия...)" style={{ flex:1, border:'none', background:'transparent', fontSize:14, outline:'none', color:'#111827' }}/>
-          <button onClick={() => send()} disabled={!input.trim()||loading}
-            style={{ width:40, height:40, borderRadius:10, background:input.trim()&&!loading?'linear-gradient(135deg,#7C3AED,#EC4899)':'#E5E7EB', border:'none', display:'flex', alignItems:'center', justifyContent:'center', cursor:input.trim()&&!loading?'pointer':'not-allowed', transition:'all 0.2s' }}>
-            <Send size={17} color={input.trim()&&!loading?'#fff':'#9CA3AF'}/>
-          </button>
-        </div>
-        <p style={{ fontSize:11, color:'#9CA3AF', textAlign:'center', marginTop:8 }}>ЖИ кеңесші Claude API арқылы жұмыс істейді</p>
+      <div style={{ padding: "16px", background: "#fff", borderTop: "1px solid #E5E7EB", display: "flex", gap: 10 }}>
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendMessage(input)}
+          placeholder="Сұрағыңды жаз..."
+          disabled={loading}
+          style={{ flex: 1, border: "1px solid #E5E7EB", borderRadius: 50, padding: "12px 20px", fontSize: 14, outline: "none", fontFamily: "inherit" }}
+        />
+        <button
+          onClick={() => sendMessage(input)}
+          disabled={loading || !input.trim()}
+          style={{ width: 48, height: 48, borderRadius: "50%", border: "none", background: "linear-gradient(135deg,#7C3AED,#EC4899)", color: "#fff", fontSize: 20, cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", opacity: loading || !input.trim() ? 0.6 : 1 }}
+        >
+          ➤
+        </button>
       </div>
-      <style>{`@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}`}</style>
+
+      <style>{`
+        @keyframes bounce {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-6px); }
+        }
+      `}</style>
     </div>
   );
-}
+} 

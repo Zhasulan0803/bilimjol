@@ -1,75 +1,114 @@
-'use client';
-import { useAuthStore } from '../../store/auth';
-import { Trophy, Star, Medal } from 'lucide-react';
+"use client";
+import { useState } from "react";
 
-const TOP_STUDENTS = [
-  { name:'Айгерім Сейтқали', grade:9, points:4820, plan:'premium', streak:12 },
-  { name:'Бекзат Досов', grade:10, points:4310, plan:'vip', streak:8 },
-  { name:'Мадина Асқарова', grade:8, points:3975, plan:'premium', streak:15 },
-  { name:'Ерлан Нұрланов', grade:7, points:3640, plan:'basic', streak:5 },
-  { name:'Зарина Әлиева', grade:6, points:3210, plan:'basic', streak:7 },
-  { name:'Нұрбол Қасымов', grade:9, points:2980, plan:'premium', streak:3 },
-  { name:'Айдана Серікова', grade:8, points:2760, plan:'basic', streak:9 },
-  { name:'Темір Жаксыбеков', grade:10, points:2540, plan:'vip', streak:11 },
-  { name:'Сауле Нурланова', grade:5, points:2310, plan:'free', streak:4 },
-  { name:'Асыл Досжанов', grade:7, points:2100, plan:'basic', streak:6 },
+const USERS = [
+  { rank: 1, name: "Айгерім Сейтқали", grade: "9-сынып", xp: 12450, level: 24, streak: 30, badges: ["🔥","⭐","🏆","💎"], plan: "VIP" },
+  { rank: 2, name: "Ерлан Бекұлы", grade: "10-сынып", xp: 11200, level: 22, streak: 25, badges: ["🔥","⭐","🏆"], plan: "PREMIUM" },
+  { rank: 3, name: "Дана Жаксыбекова", grade: "9-сынып", xp: 10800, level: 21, streak: 20, badges: ["🔥","⭐"], plan: "PREMIUM" },
+  { rank: 4, name: "Асем Нурланова", grade: "8-сынып", xp: 9500, level: 19, streak: 15, badges: ["🔥","⭐"], plan: "BASIC" },
+  { rank: 5, name: "Бекзат Омаров", grade: "10-сынып", xp: 8900, level: 18, streak: 12, badges: ["🔥"], plan: "PREMIUM" },
+  { rank: 6, name: "Гүлнар Ахметова", grade: "7-сынып", xp: 7600, level: 16, streak: 10, badges: ["⭐"], plan: "BASIC" },
+  { rank: 7, name: "Нурлан Әбенов", grade: "8-сынып", xp: 6800, level: 14, streak: 8, badges: ["🔥"], plan: "BASIC" },
+  { rank: 8, name: "Мадина Жаксыбек", grade: "9-сынып", xp: 5900, level: 12, streak: 7, badges: [], plan: "FREE" },
+  { rank: 9, name: "Зарина Досова", grade: "7-сынып", xp: 4820, level: 12, streak: 7, badges: [], plan: "FREE" },
+  { rank: 10, name: "Сенің орның", grade: "9-сынып", xp: 4820, level: 12, streak: 7, badges: [], plan: "PREMIUM", isMe: true },
 ];
 
-export default function Leaderboard() {
-  const { user } = useAuthStore();
-  const planColors: Record<string,string> = { free:'#6a6f73', basic:'#1e6055', premium:'#a435f0', vip:'#f69c08' };
+const PERIODS = ["Апта", "Ай", "Барлық уақыт"];
+
+const MEDAL: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
+const PLAN_COLORS: Record<string, string> = { VIP: "#F97316", PREMIUM: "#7C3AED", BASIC: "#10B981", FREE: "#9CA3AF" };
+
+export default function LeaderboardPage() {
+  const [period, setPeriod] = useState("Барлық уақыт");
 
   return (
-    <div style={{padding:'32px'}}>
-      <h1 style={{fontSize:22,fontWeight:800,marginBottom:4}}>Рейтинг кестесі</h1>
-      <p style={{color:'#6a6f73',fontSize:14,marginBottom:28}}>Бұл аптаның үздік оқушылары</p>
-
-      {/* Top 3 podium */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:32,maxWidth:600}}>
-        {[TOP_STUDENTS[1], TOP_STUDENTS[0], TOP_STUDENTS[2]].map((s,pos)=>{
-          const realPos = pos===0?2:pos===1?1:3;
-          const colors = ['#C0C0C0','#FFD700','#CD7F32'];
-          const sizes = [80,96,80];
-          return (
-            <div key={s.name} style={{textAlign:'center',paddingTop:pos===1?0:20}}>
-              <div style={{width:sizes[pos],height:sizes[pos],borderRadius:'50%',background:colors[pos],display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 8px',fontSize:24,fontWeight:800,color:'#fff',border:`4px solid ${colors[pos]}`,boxSizing:'border-box'}}>
-                {s.name.slice(0,1)}
-              </div>
-              <div style={{fontWeight:700,fontSize:13}}>{s.name.split(' ')[0]}</div>
-              <div style={{fontSize:12,color:'#6a6f73'}}>{s.grade}-сынып</div>
-              <div style={{fontWeight:800,fontSize:15,color:colors[pos],marginTop:4}}>{s.points.toLocaleString()}</div>
-              <div style={{fontSize:24,marginTop:2}}>{realPos===1?'🥇':realPos===2?'🥈':'🥉'}</div>
-            </div>
-          );
-        })}
+    <div style={{ padding: 24, fontFamily: "Inter, sans-serif" }}>
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1F2937" }}>Рейтинг 🏆</h1>
+        <p style={{ color: "#6B7280", fontSize: 14, marginTop: 4 }}>Үздік оқушылар тізімі</p>
       </div>
 
-      {/* Full table */}
-      <div style={{background:'#fff',border:'1px solid #d1d7dc',borderRadius:4,overflow:'hidden'}}>
-        <div style={{padding:'14px 20px',borderBottom:'2px solid #d1d7dc',display:'grid',gridTemplateColumns:'48px 1fr 100px 80px 90px 90px',gap:8,fontSize:12,fontWeight:700,color:'#6a6f73',textTransform:'uppercase',letterSpacing:'.5px'}}>
-          <div>#</div><div>Оқушы</div><div>Сынып</div><div>Жоспар</div><div>Жазба</div><div>Ұпай</div>
+      {/* TOP 3 */}
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-end", gap: 16, marginBottom: 32 }}>
+        {/* 2nd */}
+        <div style={{ textAlign: "center" }}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg,#9CA3AF,#6B7280)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 20, margin: "0 auto 8px" }}>
+            {USERS[1].name[0]}
+          </div>
+          <div style={{ fontSize: 24 }}>🥈</div>
+          <div style={{ fontWeight: 700, fontSize: 13, color: "#1F2937", marginTop: 4 }}>{USERS[1].name.split(" ")[0]}</div>
+          <div style={{ fontSize: 12, color: "#6B7280" }}>{USERS[1].xp.toLocaleString()} XP</div>
+          <div style={{ height: 80, background: "#E5E7EB", borderRadius: "8px 8px 0 0", marginTop: 8, width: 80 }} />
         </div>
-        {TOP_STUDENTS.map((s,i)=>{
-          const isMe = user?.name === s.name;
-          return (
-            <div key={i} style={{padding:'12px 20px',display:'grid',gridTemplateColumns:'48px 1fr 100px 80px 90px 90px',gap:8,alignItems:'center',background:isMe?'#f0e6ff':'transparent',borderBottom:'1px solid #f0f0f0'}}>
-              <div style={{fontWeight:700,fontSize:16,color:i<3?['#FFD700','#C0C0C0','#CD7F32'][i]:'#6a6f73'}}>
-                {i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}
-              </div>
-              <div style={{display:'flex',alignItems:'center',gap:10}}>
-                <div style={{width:36,height:36,borderRadius:'50%',background:planColors[s.plan],display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontWeight:700,fontSize:14,flexShrink:0}}>{s.name.slice(0,1)}</div>
-                <div>
-                  <div style={{fontWeight:600,fontSize:14}}>{s.name}{isMe?' (Сіз)':''}</div>
-                </div>
-              </div>
-              <div style={{fontSize:14,color:'#6a6f73'}}>{s.grade}-сынып</div>
-              <div><span style={{background:planColors[s.plan]+'22',color:planColors[s.plan],fontSize:11,fontWeight:700,padding:'3px 8px',borderRadius:10}}>{s.plan.toUpperCase()}</span></div>
-              <div style={{fontSize:14}}>🔥 {s.streak} күн</div>
-              <div style={{fontWeight:800,fontSize:15,color:'#a435f0'}}>{s.points.toLocaleString()}</div>
+        {/* 1st */}
+        <div style={{ textAlign: "center" }}>
+          <div style={{ width: 68, height: 68, borderRadius: "50%", background: "linear-gradient(135deg,#FBBF24,#F59E0B)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 24, margin: "0 auto 8px", boxShadow: "0 4px 16px rgba(251,191,36,0.4)" }}>
+            {USERS[0].name[0]}
+          </div>
+          <div style={{ fontSize: 28 }}>🥇</div>
+          <div style={{ fontWeight: 800, fontSize: 14, color: "#1F2937", marginTop: 4 }}>{USERS[0].name.split(" ")[0]}</div>
+          <div style={{ fontSize: 12, color: "#6B7280" }}>{USERS[0].xp.toLocaleString()} XP</div>
+          <div style={{ height: 110, background: "linear-gradient(135deg,#FBBF24,#F59E0B)", borderRadius: "8px 8px 0 0", marginTop: 8, width: 80 }} />
+        </div>
+        {/* 3rd */}
+        <div style={{ textAlign: "center" }}>
+          <div style={{ width: 52, height: 52, borderRadius: "50%", background: "linear-gradient(135deg,#CD7F32,#A0522D)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 18, margin: "0 auto 8px" }}>
+            {USERS[2].name[0]}
+          </div>
+          <div style={{ fontSize: 22 }}>🥉</div>
+          <div style={{ fontWeight: 700, fontSize: 13, color: "#1F2937", marginTop: 4 }}>{USERS[2].name.split(" ")[0]}</div>
+          <div style={{ fontSize: 12, color: "#6B7280" }}>{USERS[2].xp.toLocaleString()} XP</div>
+          <div style={{ height: 60, background: "#CD7F32", borderRadius: "8px 8px 0 0", marginTop: 8, width: 80 }} />
+        </div>
+      </div>
+
+      {/* Period filter */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+        {PERIODS.map(p => (
+          <button
+            key={p}
+            onClick={() => setPeriod(p)}
+            style={{ padding: "8px 16px", borderRadius: 50, fontSize: 13, fontWeight: 600, cursor: "pointer", border: "none", fontFamily: "inherit", background: period === p ? "#7C3AED" : "#F3F4F6", color: period === p ? "#fff" : "#374151" }}
+          >
+            {p}
+          </button>
+        ))}
+      </div>
+
+      {/* List */}
+      <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #E5E7EB", overflow: "hidden" }}>
+        {USERS.map((u, i) => (
+          <div
+            key={i}
+            style={{
+              display: "flex", alignItems: "center", gap: 12, padding: "14px 20px",
+              borderBottom: i < USERS.length - 1 ? "1px solid #F3F4F6" : "none",
+              background: u.isMe ? "#F5F3FF" : "#fff",
+            }}
+          >
+            <div style={{ width: 28, textAlign: "center", fontSize: u.rank <= 3 ? 20 : 14, fontWeight: 700, color: "#9CA3AF", flexShrink: 0 }}>
+              {MEDAL[u.rank] || u.rank}
             </div>
-          );
-        })}
+            <div style={{ width: 40, height: 40, borderRadius: "50%", background: u.isMe ? "linear-gradient(135deg,#7C3AED,#EC4899)" : "linear-gradient(135deg,#E5E7EB,#D1D5DB)", display: "flex", alignItems: "center", justifyContent: "center", color: u.isMe ? "#fff" : "#6B7280", fontWeight: 800, fontSize: 16, flexShrink: 0 }}>
+              {u.name[0]}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: u.isMe ? 800 : 600, fontSize: 14, color: "#1F2937", display: "flex", alignItems: "center", gap: 6 }}>
+                {u.name} {u.isMe && <span style={{ fontSize: 11, color: "#7C3AED", fontWeight: 700 }}>(Сен)</span>}
+              </div>
+              <div style={{ fontSize: 12, color: "#6B7280" }}>{u.grade} · Деңгей {u.level} · 🔥{u.streak} күн</div>
+            </div>
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              <div style={{ fontWeight: 800, fontSize: 14, color: "#1F2937" }}>{u.xp.toLocaleString()}</div>
+              <div style={{ fontSize: 11, color: "#9CA3AF" }}>XP</div>
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#fff", background: PLAN_COLORS[u.plan], padding: "3px 8px", borderRadius: 6, flexShrink: 0 }}>
+              {u.plan}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
-}
+} 
