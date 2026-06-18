@@ -8,20 +8,20 @@ const TOP_COURSES = [
 ];
 
 const SUBJECTS = [
-  { name: "Математика", emoji: "🔢" },
-  { name: "Физика", emoji: "⚡" },
-  { name: "Химия", emoji: "🧪" },
-  { name: "Биология", emoji: "🔬" },
-  { name: "Қазақ тілі", emoji: "📚" },
-  { name: "Тарих", emoji: "🏛️" },
-  { name: "Ағылшын", emoji: "🌍" },
+  { id: "math", name: "Математика", emoji: "🔢" },
+  { id: "physics", name: "Физика", emoji: "⚡" },
+  { id: "chemistry", name: "Химия", emoji: "🧪" },
+  { id: "biology", name: "Биология", emoji: "🔬" },
+  { id: "kazakh", name: "Қазақ тілі", emoji: "📚" },
+  { id: "history", name: "Тарих", emoji: "🏛️" },
+  { id: "english", name: "Ағылшын", emoji: "🌍" },
 ];
 
 const POPULAR_COURSES = [
-  { grade: "7-сынып", name: "Алгебра негіздері", teacher: "Нурлан Әбенов", rating: 4.9, reviews: 312, level: "Базалық", plan: "ТЕГІН", color: "#EDE9FE" },
-  { grade: "8-сынып", name: "Геометрия", teacher: "Зарина Досова", rating: 4.8, reviews: 245, level: "Орта", plan: "BASIC", color: "#DBEAFE" },
-  { grade: "8-сынып", name: "Квадрат теңдеулер", teacher: "Бекзат Омаров", rating: 4.8, reviews: 289, level: "Маңызды", plan: "BASIC", color: "#FCE7F3" },
-  { grade: "9-сынып", name: "Тригонометрия", teacher: "Бекзат Омаров", rating: 4.7, reviews: 198, level: "Күрделі", plan: "PREMIUM", color: "#FEF3C7" },
+  { id: "1", grade: "7-сынып", name: "Алгебра негіздері", teacher: "Нурлан Әбенов", rating: 4.9, reviews: 312, level: "Базалық", plan: "ТЕГІН", color: "#EDE9FE" },
+  { id: "2", grade: "8-сынып", name: "Геометрия", teacher: "Зарина Досова", rating: 4.8, reviews: 245, level: "Орта", plan: "BASIC", color: "#DBEAFE" },
+  { id: "3", grade: "8-сынып", name: "Квадрат теңдеулер", teacher: "Бекзат Омаров", rating: 4.8, reviews: 289, level: "Маңызды", plan: "BASIC", color: "#FCE7F3" },
+  { id: "4", grade: "9-сынып", name: "Тригонометрия", teacher: "Бекзат Омаров", rating: 4.7, reviews: 198, level: "Күрделі", plan: "PREMIUM", color: "#FEF3C7" },
 ];
 
 const FEATURES = [
@@ -97,7 +97,7 @@ export default function HomePage() {
             </Link>
             <div className="nav-links">
               {["Басты","Курстар","Бағалар","Рейтинг"].map(l => (
-                <a key={l} href="#" style={{ color: "#6B7280", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>{l}</a>
+                <a key={l} href={l === "Курстар" ? "/courses" : "#"} style={{ color: "#6B7280", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>{l}</a>
               ))}
             </div>
           </div>
@@ -129,9 +129,9 @@ export default function HomePage() {
               <Link href="/auth/signin" style={{ background: "linear-gradient(135deg,#F97316,#EC4899)", color: "#fff", fontWeight: 700, padding: "13px 26px", borderRadius: 50, fontSize: 15, textDecoration: "none" }}>
                 Тегін бастау →
               </Link>
-              <a href="#courses" style={{ background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 600, padding: "13px 26px", borderRadius: 50, fontSize: 15, textDecoration: "none", border: "1px solid rgba(255,255,255,0.3)" }}>
+              <Link href="/courses" style={{ background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 600, padding: "13px 26px", borderRadius: 50, fontSize: 15, textDecoration: "none", border: "1px solid rgba(255,255,255,0.3)" }}>
                 Курстарды қарау
-              </a>
+              </Link>
             </div>
             <div className="stats-row">
               {STATS.map(s => (
@@ -153,9 +153,9 @@ export default function HomePage() {
                 <span style={{ background: "#10B981", color: "#fff", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6 }}>ТЕГІН</span>
               </div>
             ))}
-            <button style={{ width: "100%", marginTop: 8, padding: "12px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#7C3AED,#EC4899)", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>
+            <Link href="/courses" style={{ display: "block", width: "100%", marginTop: 8, padding: "12px", borderRadius: 12, background: "linear-gradient(135deg,#7C3AED,#EC4899)", color: "#fff", fontWeight: 700, fontSize: 14, textAlign: "center", textDecoration: "none" }}>
               Барлық курстар →
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -169,10 +169,10 @@ export default function HomePage() {
           </div>
           <div className="subjects-grid">
             {SUBJECTS.map(s => (
-              <button key={s.name} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 16px", background: "#fff", border: "1px solid #E5E7EB", borderRadius: 14, cursor: "pointer", minWidth: 80 }}>
+              <Link key={s.id} href={`/courses?subject=${s.id}`} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "14px 16px", background: "#fff", border: "1px solid #E5E7EB", borderRadius: 14, cursor: "pointer", minWidth: 80, textDecoration: "none" }}>
                 <span style={{ fontSize: 26 }}>{s.emoji}</span>
                 <span style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>{s.name}</span>
-              </button>
+              </Link>
             ))}
           </div>
         </div>
@@ -183,23 +183,25 @@ export default function HomePage() {
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
             <h2 style={{ fontSize: 22, fontWeight: 800, color: "#1F2937" }}>Танымал курстар</h2>
-            <a href="#" style={{ color: "#7C3AED", fontWeight: 600, textDecoration: "none", fontSize: 14 }}>Барлығы →</a>
+            <Link href="/courses" style={{ color: "#7C3AED", fontWeight: 600, textDecoration: "none", fontSize: 14 }}>Барлығы →</Link>
           </div>
           <div className="courses-grid">
             {POPULAR_COURSES.map(c => (
-              <div key={c.name} style={{ background: "#fff", borderRadius: 16, overflow: "hidden", border: "1px solid #E5E7EB" }}>
-                <div style={{ height: 110, background: c.color, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: 36, opacity: 0.4 }}>📐</span>
-                  <span style={{ position: "absolute", top: 8, left: 8, fontSize: 11, fontWeight: 700, color: "#7C3AED", background: "#EDE9FE", padding: "3px 8px", borderRadius: 50 }}>{c.level}</span>
-                  <span style={{ position: "absolute", top: 8, right: 8, fontSize: 11, fontWeight: 700, color: "#fff", background: c.plan === "ТЕГІН" ? "#10B981" : "#374151", padding: "3px 8px", borderRadius: 6 }}>{c.plan}</span>
+              <Link key={c.id} href={`/courses/${c.id}`} style={{ textDecoration: "none" }}>
+                <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", border: "1px solid #E5E7EB" }}>
+                  <div style={{ height: 110, background: c.color, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ fontSize: 36, opacity: 0.4 }}>📐</span>
+                    <span style={{ position: "absolute", top: 8, left: 8, fontSize: 11, fontWeight: 700, color: "#7C3AED", background: "#EDE9FE", padding: "3px 8px", borderRadius: 50 }}>{c.level}</span>
+                    <span style={{ position: "absolute", top: 8, right: 8, fontSize: 11, fontWeight: 700, color: "#fff", background: c.plan === "ТЕГІН" ? "#10B981" : "#374151", padding: "3px 8px", borderRadius: 6 }}>{c.plan}</span>
+                  </div>
+                  <div style={{ padding: 14 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#7C3AED", marginBottom: 3 }}>{c.grade}</div>
+                    <div style={{ fontWeight: 700, color: "#1F2937", marginBottom: 3, fontSize: 14 }}>{c.name}</div>
+                    <div style={{ color: "#6B7280", fontSize: 12, marginBottom: 6 }}>{c.teacher}</div>
+                    <div style={{ color: "#FBBF24", fontSize: 12 }}>{"★".repeat(Math.floor(c.rating))} <span style={{ color: "#374151", fontWeight: 600 }}>{c.rating}</span> <span style={{ color: "#9CA3AF" }}>({c.reviews})</span></div>
+                  </div>
                 </div>
-                <div style={{ padding: 14 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "#7C3AED", marginBottom: 3 }}>{c.grade}</div>
-                  <div style={{ fontWeight: 700, color: "#1F2937", marginBottom: 3, fontSize: 14 }}>{c.name}</div>
-                  <div style={{ color: "#6B7280", fontSize: 12, marginBottom: 6 }}>{c.teacher}</div>
-                  <div style={{ color: "#FBBF24", fontSize: 12 }}>{"★".repeat(Math.floor(c.rating))} <span style={{ color: "#374151", fontWeight: 600 }}>{c.rating}</span> <span style={{ color: "#9CA3AF" }}>({c.reviews})</span></div>
-                </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -251,9 +253,9 @@ export default function HomePage() {
                     </div>
                   ))}
                 </div>
-                <button style={{ width: "100%", padding: "10px", borderRadius: 12, fontWeight: 600, fontSize: 14, cursor: "pointer", fontFamily: "inherit", border: p.btnBorder, color: p.btnColor, background: p.btnBg }}>
+                <Link href="/auth/signin" style={{ display: "block", width: "100%", padding: "10px", borderRadius: 12, fontWeight: 600, fontSize: 14, textAlign: "center", textDecoration: "none", border: p.btnBorder, color: p.btnColor, background: p.btnBg }}>
                   {p.btnText}
-                </button>
+                </Link>
               </div>
             ))}
           </div>
@@ -282,13 +284,14 @@ export default function HomePage() {
           <div style={{ display: "flex", gap: 40, flexWrap: "wrap" }}>
             <div>
               <div style={{ color: "#fff", fontWeight: 600, marginBottom: 10, fontSize: 14 }}>Платформа</div>
-              {["Курстар","Бағалар","Рейтинг","ЖИ-кеңесші"].map(l => (
-                <a key={l} href="#" style={{ display: "block", marginBottom: 7, fontSize: 13, color: "#9CA3AF", textDecoration: "none" }}>{l}</a>
-              ))}
+              <Link href="/courses" style={{ display: "block", marginBottom: 7, fontSize: 13, color: "#9CA3AF", textDecoration: "none" }}>Курстар</Link>
+              <Link href="/auth/signin" style={{ display: "block", marginBottom: 7, fontSize: 13, color: "#9CA3AF", textDecoration: "none" }}>Бағалар</Link>
+              <Link href="/dashboard/leaderboard" style={{ display: "block", marginBottom: 7, fontSize: 13, color: "#9CA3AF", textDecoration: "none" }}>Рейтинг</Link>
+              <Link href="/dashboard/ai-chat" style={{ display: "block", marginBottom: 7, fontSize: 13, color: "#9CA3AF", textDecoration: "none" }}>ЖИ-кеңесші</Link>
             </div>
             <div>
               <div style={{ color: "#fff", fontWeight: 600, marginBottom: 10, fontSize: 14 }}>Байланыс</div>
-              {["info@bilimjol.kz","WhatsApp","Telegram"].map(l => (
+              {["info@bilimjol.kz", "WhatsApp", "Telegram"].map(l => (
                 <div key={l} style={{ marginBottom: 7, fontSize: 13 }}>{l}</div>
               ))}
             </div>
@@ -300,4 +303,4 @@ export default function HomePage() {
       </footer>
     </div>
   );
-} 
+}  
