@@ -1,11 +1,15 @@
 "use client";
 import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+
+const redirectByRole = (role?: string) => {
+  if (role === "admin") return "/admin";
+  if (role === "teacher") return "/teacher";
+  return "/dashboard";
+};
 
 export default function SignInPage() {
-  const router = useRouter();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [form, setForm] = useState({ name: "", email: "", password: "", grade: "" });
   const [error, setError] = useState("");
@@ -15,32 +19,47 @@ export default function SignInPage() {
     setLoading(true);
     setError("");
 
-    if (mode === "register") {
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+    try {
+      if (mode === "register") {
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fullName: form.name,
+            email: form.email,
+            password: form.password,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error || "Тіркелу қатесі");
+          setLoading(false);
+          return;
+        }
+      }
+
+      const { data: auth, error: authError } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password,
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error);
+
+      if (authError || !auth.user) {
+        setError("Email немесе құпия сөз қате");
         setLoading(false);
         return;
       }
-    }
 
-    const result = await signIn("credentials", {
-      email: form.email,
-      password: form.password,
-      redirect: false,
-    });
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", auth.user.id)
+        .single();
 
-    if (result?.error) {
-      setError("Email немесе құпия сөз қате");
-    } else {
-      router.push("/dashboard");
+      window.location.href = redirectByRole(profile?.role);
+    } catch {
+      setError("Сервер қатесі");
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -89,18 +108,6 @@ export default function SignInPage() {
             onChange={e => setForm({ ...form, password: e.target.value })}
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
           />
-          {mode === "register" && (
-            <select
-              value={form.grade}
-              onChange={e => setForm({ ...form, grade: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 text-gray-600"
-            >
-              <option value="">Сыныпты таңда</option>
-              {[5,6,7,8,9,10].map(g => (
-                <option key={g} value={g}>{g}-сынып</option>
-              ))}
-            </select>
-          )}
         </div>
 
         {error && (
@@ -122,4 +129,4 @@ export default function SignInPage() {
       </div>
     </div>
   );
-} 
+}

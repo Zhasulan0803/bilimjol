@@ -1,27 +1,41 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuthStore } from '../../store/auth';
 import { Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const { register } = useAuthStore();
   const [form, setForm] = useState({ name:'', email:'', password:'', grade:7 });
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.name||!form.email||!form.password) { setError('Барлық өрістерді толтырыңыз'); return; }
     if (form.password.length<6) { setError('Пароль кемінде 6 таңба'); return; }
     setLoading(true);
-    setTimeout(() => {
-      const r = register({ ...form, role:'student' });
-      if (r.success) router.push('/dashboard');
-      else { setError(r.error||'Қате'); setLoading(false); }
-    }, 600);
+    setError('');
+
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName: form.name, email: form.email, password: form.password }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || 'Қате'); setLoading(false); return; }
+
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password,
+      });
+      if (authError) { setError('Кіру қатесі'); setLoading(false); return; }
+
+      window.location.href = '/dashboard';
+    } catch {
+      setError('Сервер қатесі');
+      setLoading(false);
+    }
   };
 
   return (
