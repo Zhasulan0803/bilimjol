@@ -101,11 +101,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               >
                 <span>{item.icon}</span>
                 <span>{item.label}</span>
-                {item.badge && (
-                  <span style={{ marginLeft: "auto", background: "#10B981", color: "#fff", fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: 6 }}>
-                    {item.badge}
-                  </span>
-                )}
               </Link>
             );
           })}
