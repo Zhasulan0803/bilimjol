@@ -68,7 +68,6 @@ export default function Header() {
                     {[
                       { href:'/dashboard', icon:<LayoutDashboard size={15}/>, label:'Дашборд' },
                       { href:'/dashboard/courses', icon:<BookOpen size={15}/>, label:'Курстарым' },
-                      { href:'/dashboard/ai-chat', icon:<Zap size={15}/>, label:'ЖИ кеңесші' },
                     ].map(item => (
                       <Link key={item.href} href={item.href} onClick={() => setDrop(false)} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', fontSize:14, color:'#374151', transition:'background 0.15s' }}
                         onMouseEnter={e => e.currentTarget.style.background='#F9FAFB'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>

@@ -25,7 +25,6 @@ const POPULAR_COURSES = [
 ];
 
 const FEATURES = [
-  { icon: "🤖", title: "ЖИ-кеңесші", desc: "Кез келген сұрақты ЖИ-ге бер — қазақ тілінде жауап ал", bg: "#EDE9FE" },
   { icon: "🏆", title: "Олимпиада дайындық", desc: "Аудандық, облыстық, республикалық олимпиадаға арналған тапсырмалар", bg: "#FEF3C7" },
   { icon: "🎮", title: "Геймификация", desc: "Деңгей көтер, жетістік ал, рейтингте өр — оқу ойынға айналады", bg: "#FCE7F3" },
   { icon: "📊", title: "Прогресс бақылау", desc: "Апталық, айлық нәтижелер графиктермен көрсетіледі", bg: "#DBEAFE" },
@@ -36,7 +35,7 @@ const FEATURES = [
 const PLANS = [
   { name: "Тегін", price: "0", unit: "тегін", color: "#1F2937", btnBorder: "1px solid #D1D5DB", btnColor: "#374151", btnBg: "#fff", features: ["3 тегін курс", "Базалық тесттер", "Прогресс бақылау", "Қоғамдық форум"], btnText: "Тегін бастау" },
   { name: "Базалық", price: "2 900", unit: "₸/ай", color: "#10B981", btnBorder: "1px solid #10B981", btnColor: "#10B981", btnBg: "#fff", features: ["Барлық тегін курстар", "5-7 сынып курстары", "Тест жауаптары", "Email қолдау"], btnText: "Таңдау" },
-  { name: "Премиум", price: "4 900", unit: "₸/ай", color: "#7C3AED", popular: true, btnBorder: "none", btnColor: "#fff", btnBg: "#7C3AED", features: ["Basic барлығы", "8-9 сынып курстары", "Олимпиада тапсырмалары", "ЖИ-кеңесші"], btnText: "Таңдау" },
+  { name: "Премиум", price: "4 900", unit: "₸/ай", color: "#7C3AED", popular: true, btnBorder: "none", btnColor: "#fff", btnBg: "#7C3AED", features: ["Basic барлығы", "8-9 сынып курстары", "Олимпиада тапсырмалары"], btnText: "Таңдау" },
   { name: "ВИП", price: "7 900", unit: "₸/ай", color: "#F97316", btnBorder: "1px solid #F97316", btnColor: "#F97316", btnBg: "#fff", features: ["Premium барлығы", "10-сынып курстары", "Жеке мұғаліммен сессия", "Жеке оқу жоспары"], btnText: "Таңдау" },
 ];
 
@@ -287,7 +286,6 @@ export default function HomePage() {
               <Link href="/courses" style={{ display: "block", marginBottom: 7, fontSize: 13, color: "#9CA3AF", textDecoration: "none" }}>Курстар</Link>
               <Link href="/auth/signin" style={{ display: "block", marginBottom: 7, fontSize: 13, color: "#9CA3AF", textDecoration: "none" }}>Бағалар</Link>
               <Link href="/dashboard/leaderboard" style={{ display: "block", marginBottom: 7, fontSize: 13, color: "#9CA3AF", textDecoration: "none" }}>Рейтинг</Link>
-              <Link href="/dashboard/ai-chat" style={{ display: "block", marginBottom: 7, fontSize: 13, color: "#9CA3AF", textDecoration: "none" }}>ЖИ-кеңесші</Link>
             </div>
             <div>
               <div style={{ color: "#fff", fontWeight: 600, marginBottom: 10, fontSize: 14 }}>Байланыс</div>

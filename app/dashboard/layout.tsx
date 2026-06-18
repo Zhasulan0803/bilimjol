@@ -8,7 +8,6 @@ const studentNav = [
   { href: "/dashboard/courses", label: "Менің курстарым", icon: "📚" },
   { href: "/dashboard/tests", label: "Тесттер", icon: "📝" },
   { href: "/dashboard/leaderboard", label: "Рейтинг", icon: "🏆" },
-  { href: "/dashboard/ai-chat", label: "ЖИ кеңесші", icon: "🤖", badge: "NEW" },
   { href: "/pricing", label: "Жоспарым", icon: "💎" },
 ];
 
